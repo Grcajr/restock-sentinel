@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "restock-sentinel"
+version = "0.1.0"
+description = "Modular, plugin-based restock/stock-alert bot for e-commerce retailers"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Jerry Cantu" }]
+keywords = ["automation", "web-scraping", "bot", "e-commerce", "playwright"]
+dependencies = [
+    "requests>=2.31",
+    "beautifulsoup4>=4.12",
+    "playwright>=1.44",
+    "python-dotenv>=1.0",
+    "APScheduler>=3.10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-mock>=3.14",
+    "ruff>=0.5",
+    "responses>=0.25",
+]
+
+[project.scripts]
+restock-sentinel = "restock_sentinel.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/restock_sentinel"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
