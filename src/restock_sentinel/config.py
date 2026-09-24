@@ -24,6 +24,7 @@ class Config:
     discord_webhook_url: str | None
     database_path: Path
     check_interval_seconds: int
+    check_interval_jitter_seconds: int
     playwright_headless: bool
     enable_dry_run_checkout: bool
 
@@ -39,6 +40,9 @@ class Config:
             discord_webhook_url=os.getenv("DISCORD_WEBHOOK_URL") or None,
             database_path=db_path,
             check_interval_seconds=int(os.getenv("CHECK_INTERVAL_SECONDS", "60")),
+            check_interval_jitter_seconds=int(
+                os.getenv("CHECK_INTERVAL_JITTER_SECONDS", "10")
+            ),
             playwright_headless=_str_to_bool(os.getenv("PLAYWRIGHT_HEADLESS", "true")),
             enable_dry_run_checkout=_str_to_bool(
                 os.getenv("ENABLE_DRY_RUN_CHECKOUT", "false")
