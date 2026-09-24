@@ -1,3 +1,5 @@
+"""Tests for the plugin registry: registration, lookup, and error handling."""
+
 from __future__ import annotations
 
 import pytest

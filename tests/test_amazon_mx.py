@@ -1,3 +1,11 @@
+"""Tests for the Amazon.mx plugin's HTML-parsing logic.
+
+Runs `_parse()` directly against saved HTML fixtures (no network/browser
+needed) — including regression fixtures captured from a real live listing
+during manual testing, covering the bot-check page, the async multi-seller
+availability widget, and Amazon's "zero offers" signal.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

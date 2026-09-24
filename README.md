@@ -60,6 +60,40 @@ code never import a specific retailer; they only know about the
 `plugins/target.py`, etc. for what "planned but not yet implemented" looks
 like, including notes on what each retailer's real integration would need.
 
+## Project structure
+
+Every file below has a docstring at the top explaining what it does — this
+is just a map to find your way around without opening each one.
+
+```
+restock-sentinel/
+├── src/restock_sentinel/
+│   ├── cli.py            # entry point — this is what `restock-sentinel` runs
+│   ├── config.py         # loads settings from .env
+│   ├── models.py         # shared data types (TrackedProduct, StockCheckResult)
+│   ├── db.py             # SQLite: tracked products, check history, alert log
+│   ├── registry.py       # plugin lookup — maps "amazon_mx" -> AmazonMXPlugin
+│   ├── plugins/
+│   │   ├── base.py           # RetailerPlugin — the interface every plugin implements
+│   │   ├── amazon_mx.py      # working plugin: Amazon.mx stock checks
+│   │   └── walmart.py, sams_club.py, target.py, costco.py,
+│   │       pokemon_center.py # stubs — registered but not implemented yet
+│   ├── alerts/
+│   │   └── discord.py    # sends the restock notification to Discord
+│   └── checkout/
+│       └── playwright_checkout.py  # dry-run add-to-cart -> checkout, no payment
+├── tests/                 # pytest suite — run with `pytest`, not directly
+│   ├── test_amazon_mx.py
+│   ├── test_db.py
+│   ├── test_registry.py
+│   └── fixtures/          # saved HTML pages the tests parse against
+└── .github/workflows/ci.yml  # runs the tests + linter on every push
+```
+
+Nothing in `src/` or `tests/` is meant to be run by opening the file
+directly — the `restock-sentinel` command (see Usage below) is the actual
+front door, and `pytest` / `ruff check .` are how the tests and linter run.
+
 ## Status
 
 | Retailer         | Status        |

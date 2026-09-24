@@ -1,3 +1,10 @@
+"""Tests for the SQLite persistence layer (products, stock checks, alerts).
+
+Each test gets its own throwaway database file via pytest's `tmp_path`
+fixture, so tests never touch the real `data/restock_sentinel.db` or
+interfere with each other.
+"""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
