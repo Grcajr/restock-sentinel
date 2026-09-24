@@ -9,12 +9,6 @@ automation can act on the alert fast enough to matter.
 Built to be extended: adding a new retailer is writing one class, not
 touching the scheduler, database, or alerting code.
 
-[![CI](https://github.com/USERNAME/restock-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/restock-sentinel/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/python-3.11%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-
-> Replace `USERNAME` above with your GitHub username once this is pushed.
-
 ## Why this exists
 
 Limited-stock items (restocks, drops, collectibles) sell out in minutes.
@@ -88,7 +82,7 @@ like, including notes on what each retailer's real integration would need.
 ## Setup
 
 ```bash
-git clone https://github.com/USERNAME/restock-sentinel.git
+git clone https://github.com/Grcajr/restock-sentinel.git
 cd restock-sentinel
 
 python -m venv .venv
