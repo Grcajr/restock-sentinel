@@ -1,0 +1,30 @@
+<!--
+Best-guess sample markup for an in-stock listing -- NOT yet captured from a
+real live in-stock page (the one live test done so far happened to hit a
+sold-out item). Modeled on the real out-of-stock fixture's structure, with
+the button's `disabled` attribute and `data-component-state="disabled"`
+removed, which is the specific signal the plugin checks for. Treat this as
+a reasonable hypothesis to be confirmed by an actual live in-stock test,
+not a verified fixture.
+-->
+<html>
+<body>
+<h1 data-test="product-title" id="pdp-product-title-id">Example Gadget - Blue</h1>
+
+<div class="styles_priceCduiContainer__JQhw1" data-test="price-cdui">
+  <div data-test="price-cdui-row">
+    <span>$24.99</span>
+  </div>
+</div>
+
+<div class="h-margin-a-module-gap" data-test="module-product-detail-add-to-cart">
+  <div class="styles_productDetailAddToCartWrapper__UDJpt">
+    <div class="h-margin-v-default">
+      <button aria-label="Add to cart Example Gadget - Blue" class="styles_btn__zZcJr" data-component-state="default" data-test="AddToCart.Default" id="AddToCart.Default" role="button" type="button">
+        <span class="styles_buttonContent__SLsJ0"><span aria-hidden="false" class="styles_label__Z2F_F">Add to cart</span></span>
+      </button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

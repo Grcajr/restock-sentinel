@@ -44,7 +44,7 @@ testable) as retailers are added.
    ┌────────────┼─────────────┬───────────┬──────────┬────────────────┐
    ▼            ▼              ▼           ▼          ▼                ▼
 amazon_mx    walmart      sams_club     target      costco      pokemon_center
-(working)    (stub)        (stub)       (stub)      (stub)          (stub)
+(working)    (stub)        (stub)      (working)    (stub)          (stub)
                               │
                               ▼
                     ┌───────────────────┐
@@ -101,7 +101,7 @@ front door, and `pytest` / `ruff check .` are how the tests and linter run.
 | Amazon.mx          | ✅ Implemented |
 | Walmart             | 🔜 Stubbed     |
 | Sam's Club          | 🔜 Stubbed     |
-| Target               | 🔜 Stubbed     |
+| Target               | ✅ Implemented |
 | Costco               | 🔜 Stubbed     |
 | Pokémon Center      | 🔜 Stubbed     |
 
