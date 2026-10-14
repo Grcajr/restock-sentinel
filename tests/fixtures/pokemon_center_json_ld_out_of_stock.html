@@ -1,0 +1,30 @@
+<!--
+  Synthetic fixture: same JSON-LD shape as pokemon_center_json_ld_in_stock.html,
+  but with an OutOfStock offer -- checks the plugin reads the schema.org
+  availability URL correctly rather than just assuming "found JSON-LD" means
+  in stock. Not yet confirmed against a real pokemoncenter.com page.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>30th Celebration Elite Trainer Box | Pokémon Center Official Site</title>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Pokémon TCG: 30th Celebration Elite Trainer Box",
+    "offers": {
+      "@type": "Offer",
+      "price": "49.99",
+      "priceCurrency": "USD",
+      "availability": "http://schema.org/OutOfStock"
+    }
+  }
+  </script>
+</head>
+<body>
+  <h1>Pokémon TCG: 30th Celebration Elite Trainer Box</h1>
+  <div class="product-price">$49.99</div>
+  <button type="button" class="add-to-cart-button" disabled>Sold Out</button>
+</body>
+</html>

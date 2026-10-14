@@ -1,0 +1,30 @@
+<!--
+  Synthetic fixture: a Pokémon Center-style product page publishing
+  standard schema.org JSON-LD Product/Offer data, in stock. Not yet
+  confirmed against a real pokemoncenter.com page -- see the
+  pokemon_center plugin's module docstring.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Pikachu Plush | Pokémon Center Official Site</title>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Pikachu Plush - 8 In.",
+    "offers": {
+      "@type": "Offer",
+      "price": "24.99",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    }
+  }
+  </script>
+</head>
+<body>
+  <h1>Pikachu Plush - 8 In.</h1>
+  <div class="product-price">$24.99</div>
+  <button type="button" class="add-to-cart-button">Add to Cart</button>
+</body>
+</html>

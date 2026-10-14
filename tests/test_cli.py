@@ -42,6 +42,8 @@ def _watch_args(**overrides) -> argparse.Namespace:
         nickname=None,
         max_price=None,
         once=True,
+        auto_add_to_cart=False,
+        account="mine",
     )
     defaults.update(overrides)
     return argparse.Namespace(**defaults)
@@ -104,6 +106,66 @@ def test_alert_only_fires_once_across_repeated_in_stock_checks(monkeypatch, tmp_
 def test_next_sleep_seconds_disables_jitter_when_zero():
     """A jitter of 0 should mean exactly the base interval, no randomness."""
     assert cli._next_sleep_seconds(60, 0) == 60.0
+
+
+def test_setup_session_command_dispatches_to_capture_session(monkeypatch):
+    """Wiring test: `restock-sentinel setup-session --account ... --login-url
+    ...` should call capture_session() with exactly those two values, not
+    drive a real browser (that part is manual/interactive, see
+    tests/test_sessions.py).
+    """
+    calls = []
+    monkeypatch.setattr(cli, "capture_session", lambda account, login_url: calls.append(
+        (account, login_url)
+    ))
+    monkeypatch.setattr(cli, "load_builtin_plugins", lambda: None)
+
+    exit_code = cli.main(
+        ["setup-session", "--account", "wife", "--login-url", "https://www.walmart.com/account/login"]
+    )
+
+    assert exit_code == 0
+    assert calls == [("wife", "https://www.walmart.com/account/login")]
+
+
+def test_import_cookies_command_dispatches_to_import_cookies_from_file(monkeypatch):
+    """Wiring test: `restock-sentinel import-cookies --account ... --file ...`
+    should call import_cookies_from_file() with exactly those two values.
+    The actual JSON-parsing/conversion logic is covered separately in
+    tests/test_sessions.py.
+    """
+    calls = []
+    monkeypatch.setattr(
+        cli,
+        "import_cookies_from_file",
+        lambda account, path: calls.append((account, path)),
+    )
+    monkeypatch.setattr(cli, "load_builtin_plugins", lambda: None)
+
+    exit_code = cli.main(["import-cookies", "--account", "mine", "--file", "cookies.json"])
+
+    assert exit_code == 0
+    assert calls == [("mine", "cookies.json")]
+
+
+def test_check_session_command_dispatches_to_check_session(monkeypatch):
+    """Wiring test: `restock-sentinel check-session --account ... --url ...`
+    should call check_session() with exactly those two values. The actual
+    browser-opening logic is manual/interactive by design (see the
+    docstring on sessions.check_session), same as setup-session.
+    """
+    calls = []
+    monkeypatch.setattr(
+        cli, "check_session", lambda account, url: calls.append((account, url))
+    )
+    monkeypatch.setattr(cli, "load_builtin_plugins", lambda: None)
+
+    exit_code = cli.main(
+        ["check-session", "--account", "mine", "--url", "https://www.target.com/account"]
+    )
+
+    assert exit_code == 0
+    assert calls == [("mine", "https://www.target.com/account")]
 
 
 def test_next_sleep_seconds_stays_within_the_configured_jitter_window():

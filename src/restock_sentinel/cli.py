@@ -9,10 +9,12 @@ import sys
 import time
 
 from restock_sentinel.alerts.discord import DiscordAlerter
+from restock_sentinel.checkout.target_add_to_cart import add_to_cart_target
 from restock_sentinel.config import Config
 from restock_sentinel.db import Database
 from restock_sentinel.models import TrackedProduct
 from restock_sentinel.registry import get_plugin, list_plugins, load_builtin_plugins
+from restock_sentinel.sessions import capture_session, check_session, import_cookies_from_file
 
 logger = logging.getLogger("restock_sentinel")
 
@@ -44,8 +46,65 @@ def _build_parser() -> argparse.ArgumentParser:
     watch.add_argument("--nickname", default=None, help="friendly name for logs/alerts")
     watch.add_argument("--max-price", type=float, default=None)
     watch.add_argument("--once", action="store_true", help="check once and exit, no loop")
+    watch.add_argument(
+        "--auto-add-to-cart",
+        action="store_true",
+        help=(
+            "on restock, automatically add the item to cart (Target only, for now) "
+            "using a saved session -- stops there, never checks out. See "
+            "checkout/target_add_to_cart.py"
+        ),
+    )
+    watch.add_argument(
+        "--account",
+        default="mine",
+        help="which saved session (from `setup-session`) to use with --auto-add-to-cart",
+    )
 
     sub.add_parser("list-retailers", help="list registered retailer plugins")
+
+    setup_session = sub.add_parser(
+        "setup-session",
+        help="log into an account once, by hand, so later automation can reuse the session",
+    )
+    setup_session.add_argument(
+        "--account", required=True, help="a short label for this account, e.g. 'mine' or 'wife'"
+    )
+    setup_session.add_argument(
+        "--login-url", required=True, help="the retailer's login page URL"
+    )
+
+    import_cookies = sub.add_parser(
+        "import-cookies",
+        help=(
+            "build a session from a Cookie-Editor JSON export, for sites that block "
+            "an automated browser at the login step even when a human is driving it"
+        ),
+    )
+    import_cookies.add_argument(
+        "--account", required=True, help="a short label for this account, e.g. 'mine' or 'wife'"
+    )
+    import_cookies.add_argument(
+        "--file",
+        required=True,
+        help="path to the JSON file exported from the Cookie-Editor browser extension",
+    )
+
+    check_session_cmd = sub.add_parser(
+        "check-session",
+        help=(
+            "open a saved/imported session in a real visible browser so you can "
+            "confirm by eye it's actually logged in, before relying on it"
+        ),
+    )
+    check_session_cmd.add_argument(
+        "--account", required=True, help="the account label to check, e.g. 'mine'"
+    )
+    check_session_cmd.add_argument(
+        "--url",
+        default="https://www.target.com/account",
+        help="a page that only shows real content when logged in (default: Target account page)",
+    )
 
     return parser
 
@@ -96,6 +155,9 @@ def _run_watch(args: argparse.Namespace, config: Config) -> int:
             if sent:
                 logger.info("Restock alert sent for %s", product.display_name)
 
+            if args.auto_add_to_cart:
+                _try_auto_add_to_cart(product, args.account, alerter)
+
         if args.once:
             return 0
 
@@ -103,6 +165,46 @@ def _run_watch(args: argparse.Namespace, config: Config) -> int:
             config.check_interval_seconds, config.check_interval_jitter_seconds
         )
         time.sleep(sleep_seconds)
+
+
+def _try_auto_add_to_cart(
+    product: TrackedProduct, account_label: str, alerter: DiscordAlerter
+) -> None:
+    """Fire the auto-add-to-cart race once a restock is confirmed, and send a
+    plain follow-up Discord message with the outcome either way.
+
+    Only wired up for Target right now (see
+    checkout/target_add_to_cart.py) -- any other retailer gets an honest
+    "not supported yet" message instead of silently doing nothing.
+    """
+    if product.retailer != "target":
+        logger.warning(
+            "--auto-add-to-cart was requested for retailer '%s', but only "
+            "'target' is supported right now -- skipping",
+            product.retailer,
+        )
+        alerter.send_text(
+            f"⚠️ --auto-add-to-cart isn't supported for '{product.retailer}' yet "
+            f"(Target only, for now). You'll need to add {product.display_name} "
+            "to your cart manually."
+        )
+        return
+
+    logger.info("Restock confirmed for %s -- racing to add it to cart", product.display_name)
+    result = add_to_cart_target(product.url, account_label=account_label)
+
+    if result.success:
+        logger.info("Added %s to cart in %d attempt(s)", product.display_name, result.attempts)
+        alerter.send_text(
+            f"🛒 Added **{product.display_name}** to your Target cart "
+            f"(took {result.attempts} attempt(s)). Check out now 👉 https://www.target.com/cart"
+        )
+    else:
+        logger.warning("Could not add %s to cart: %s", product.display_name, result.error)
+        alerter.send_text(
+            f"❌ Couldn't auto-add **{product.display_name}** to your Target cart "
+            f"after {result.attempts} attempt(s): {result.error}. Jump in manually, fast 👉 {product.url}"
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -117,6 +219,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "list-retailers":
         for name in list_plugins():
             print(name)
+        return 0
+
+    if args.command == "setup-session":
+        capture_session(args.account, args.login_url)
+        return 0
+
+    if args.command == "import-cookies":
+        import_cookies_from_file(args.account, args.file)
+        return 0
+
+    if args.command == "check-session":
+        check_session(args.account, args.url)
         return 0
 
     config = Config.load()

@@ -30,7 +30,7 @@ def test_parses_real_out_of_stock_listing_with_price_and_title():
     genuinely sold-out Pokemon TCG collection. Confirms the plugin reads
     Target's actual disabled-Add-to-Cart-button signal correctly.
     """
-    html = (FIXTURES / "target_out_of_stock.html").read_text()
+    html = (FIXTURES / "target_out_of_stock.html").read_text(encoding="utf-8")
     plugin = TargetPlugin()
 
     result = plugin._parse(_product(), html)
@@ -47,7 +47,7 @@ def test_parses_in_stock_page_with_price_and_title():
     not yet confirmed against a real in-stock target.com page. See the
     module docstring's "known gap" note.
     """
-    html = (FIXTURES / "target_in_stock.html").read_text()
+    html = (FIXTURES / "target_in_stock.html").read_text(encoding="utf-8")
     plugin = TargetPlugin()
 
     result = plugin._parse(_product(), html)
@@ -63,7 +63,7 @@ def test_missing_cart_module_reports_error_instead_of_false_positive():
     Target has restructured) must degrade to an explicit error, never a
     guessed in-stock/out-of-stock reading.
     """
-    html = (FIXTURES / "target_no_cart_module.html").read_text()
+    html = (FIXTURES / "target_no_cart_module.html").read_text(encoding="utf-8")
     plugin = TargetPlugin()
 
     result = plugin._parse(_product(), html)

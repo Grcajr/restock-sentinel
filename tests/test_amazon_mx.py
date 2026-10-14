@@ -21,7 +21,7 @@ def _product() -> TrackedProduct:
 
 
 def test_parses_in_stock_page_with_price_and_title():
-    html = (FIXTURES / "amazon_mx_in_stock.html").read_text()
+    html = (FIXTURES / "amazon_mx_in_stock.html").read_text(encoding="utf-8")
     plugin = AmazonMXPlugin()
 
     result = plugin._parse(_product(), html)
@@ -33,7 +33,7 @@ def test_parses_in_stock_page_with_price_and_title():
 
 
 def test_parses_out_of_stock_page():
-    html = (FIXTURES / "amazon_mx_out_of_stock.html").read_text()
+    html = (FIXTURES / "amazon_mx_out_of_stock.html").read_text(encoding="utf-8")
     plugin = AmazonMXPlugin()
 
     result = plugin._parse(_product(), html)
@@ -77,7 +77,7 @@ def test_multi_seller_listing_with_populated_message_is_parsed_but_conservativel
     out-of-stock here — false negatives are the safer failure mode for a
     restock alert than false positives. See the plugin's module docstring.
     """
-    html = (FIXTURES / "amazon_mx_multi_seller_populated.html").read_text()
+    html = (FIXTURES / "amazon_mx_multi_seller_populated.html").read_text(encoding="utf-8")
     plugin = AmazonMXPlugin()
 
     result = plugin._parse(_product(), html)
@@ -92,7 +92,7 @@ def test_multi_seller_listing_with_unpopulated_widget_reports_error():
     content that hasn't loaded yet) — that must degrade to an explicit
     error, never a false "in stock" or "out of stock" reading.
     """
-    html = (FIXTURES / "amazon_mx_multi_seller_unpopulated.html").read_text()
+    html = (FIXTURES / "amazon_mx_multi_seller_unpopulated.html").read_text(encoding="utf-8")
     plugin = AmazonMXPlugin()
 
     result = plugin._parse(_product(), html)
@@ -109,7 +109,7 @@ def test_multi_seller_listing_with_zero_offers_field_is_confirmed_out_of_stock()
     product genuinely had zero sellers offering it), not a parse failure —
     this should report cleanly, no `error` set.
     """
-    html = (FIXTURES / "amazon_mx_multi_seller_zero_offers.html").read_text()
+    html = (FIXTURES / "amazon_mx_multi_seller_zero_offers.html").read_text(encoding="utf-8")
     plugin = AmazonMXPlugin()
 
     result = plugin._parse(_product(), html)

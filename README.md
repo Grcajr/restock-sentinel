@@ -44,7 +44,7 @@ testable) as retailers are added.
    ┌────────────┼─────────────┬───────────┬──────────┬────────────────┐
    ▼            ▼              ▼           ▼          ▼                ▼
 amazon_mx    walmart      sams_club     target      costco      pokemon_center
-(working)    (stub)        (stub)      (working)    (stub)          (stub)
+(working)   (working)      (stub)      (working)    (stub)         (working)
                               │
                               ▼
                     ┌───────────────────┐
@@ -81,7 +81,8 @@ restock-sentinel/
 │   ├── alerts/
 │   │   └── discord.py    # sends the restock notification to Discord
 │   └── checkout/
-│       └── playwright_checkout.py  # dry-run add-to-cart -> checkout, no payment
+│       ├── playwright_checkout.py   # dry-run add-to-cart -> checkout, no payment
+│       └── target_add_to_cart.py    # races to add a Target restock to cart, stops there
 ├── tests/                 # pytest suite — run with `pytest`, not directly
 │   ├── test_amazon_mx.py
 │   ├── test_db.py
@@ -99,11 +100,11 @@ front door, and `pytest` / `ruff check .` are how the tests and linter run.
 | Retailer         | Status        |
 |-------------------|---------------|
 | Amazon.mx          | ✅ Implemented |
-| Walmart             | 🔜 Stubbed     |
+| Walmart             | ✅ Implemented |
 | Sam's Club          | 🔜 Stubbed     |
 | Target               | ✅ Implemented |
 | Costco               | 🔜 Stubbed     |
-| Pokémon Center      | 🔜 Stubbed     |
+| Pokémon Center      | ✅ Implemented |
 
 ## Tech stack
 
@@ -144,11 +145,27 @@ restock-sentinel watch \
 
 # Check once and exit (useful for cron / testing)
 restock-sentinel watch --retailer amazon_mx --url "https://www.amazon.com.mx/dp/EXAMPLE" --once
+
+# One-time: capture a logged-in session for an account (opens a real
+# browser, you log in by hand, then close the window)
+restock-sentinel setup-session --account mine --login-url "https://www.target.com/login"
+
+# Watch a Target product and automatically add it to cart the instant it
+# restocks (stops there -- never checks out). Requires setup-session first.
+restock-sentinel watch \
+  --retailer target \
+  --url "https://www.target.com/p/EXAMPLE" \
+  --auto-add-to-cart --account mine
 ```
 
 When a tracked product transitions from out-of-stock to in-stock (and under
 `--max-price`, if set), a Discord alert fires. Every check is logged to
 SQLite (`data/restock_sentinel.db` by default) so you can audit history.
+With `--auto-add-to-cart` (Target only, for now), a restock also triggers
+an automated race to add the item to your cart using a saved login
+session, with a follow-up Discord message reporting success or failure --
+see `checkout/target_add_to_cart.py` for exactly where it stops (never at
+checkout, never at payment).
 
 ## Running tests
 
@@ -168,8 +185,9 @@ conservative. You're responsible for how you configure and run it.
 
 ## Roadmap
 
-- Implement Walmart, Target, Sam's Club, Costco, and Pokémon Center plugins
-  (see the TODO docstring in each stub for retailer-specific notes)
+- Implement the remaining Sam's Club and Costco plugins (see the TODO
+  docstring in each stub for retailer-specific notes)
+- Add a Macy's plugin
 - Multi-product watch lists from a config file instead of one `--url` per run
 - Web dashboard over the existing SQLite history
 - Optional SMS/email alert backends alongside Discord

@@ -36,6 +36,23 @@ class DiscordAlerter:
             logger.exception("Failed to send Discord alert for %s", result.product.url)
             return False
 
+    def send_text(self, message: str) -> bool:
+        """Post a plain text message (no embed). Returns True on a 2xx response.
+
+        Used for follow-up notifications that aren't a stock-check result --
+        e.g. "added to cart automatically, go finish checkout now."
+        """
+        payload = {"username": "restock-sentinel", "content": message}
+        try:
+            response = self.session.post(
+                self.webhook_url, json=payload, timeout=_REQUEST_TIMEOUT_SECONDS
+            )
+            response.raise_for_status()
+            return True
+        except requests.RequestException:
+            logger.exception("Failed to send Discord text message")
+            return False
+
     @staticmethod
     def _build_payload(result: StockCheckResult) -> dict:
         title = result.title or result.product.display_name

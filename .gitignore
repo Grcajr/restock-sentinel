@@ -11,6 +11,11 @@ dist/
 # env / secrets
 .env
 *.local.env
+# cookie-exports/ holds live session cookies -- ignore everything in it
+# except the README documenting the naming convention, which is safe to
+# version (it's just docs, no cookie data).
+cookie-exports/*
+!cookie-exports/README.md
 
 # app data
 *.db
